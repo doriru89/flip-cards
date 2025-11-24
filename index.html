@@ -1,0 +1,550 @@
+<!DOCTYPE html> <!-- 声明文档类型为 HTML5，让浏览器用标准模式解析 -->
+
+
+
+<html lang="zh-CN"> <!-- 设置页面语言为简体中文，方便浏览器和读屏软件识别 -->
+
+<head>
+
+    <meta charset="UTF-8"> <!-- 设置字符编码为 UTF-8，避免中文出现乱码 -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 让页面在手机上按设备宽度缩放，适配移动端 -->
+
+    <title>今天吃什么！</title> <!-- 浏览器标签栏显示的标题文字 -->
+
+    <style>
+
+        * { 
+
+            box-sizing: border-box; /* 所有元素的宽高计算包含 padding 和 border，方便控制布局 */
+
+        }
+
+        body {
+
+            margin: 0; /* 去掉浏览器默认的 body 外边距 */
+
+            padding: 20px; /* 给页面内容留出 20px 内边距 */
+
+            font-family: "Times New Roman", serif; /* 设置全局字体为 Times 风格的衬线字体，增加塔罗感 */
+
+            display: flex; /* 使用 flex 布局 */
+
+            flex-direction: column; /* 子元素垂直排列（从上到下） */
+
+            align-items: center; /* 水平居中对齐所有子元素 */
+
+            text-align: center; /* 文本居中对齐 */
+
+            /* 设置页面背景图为食物涂鸦框 */
+
+            background-image: url("https://img.freepik.com/free-vector/food-doodle-frame-beige-background-vector_53876-167977.jpg?semt=ais_hybrid&w=740&q=80");
+
+            background-size: cover; /* 背景图按比例放大填满整个容器，多余部分裁掉 */
+
+            background-repeat: no-repeat; /* 不重复平铺背景图 */
+
+            background-position: center; /* 背景图居中显示 */
+
+        }
+
+        .bubble {
+
+            position: relative; /* 为之后的小尾巴定位提供参考（绝对定位相对它） */
+
+            display: inline-block; /* 让这个块的大小刚好包住文字内容 */
+
+            padding: 10px 16px; /* 对话框内部四周留白 */
+
+            margin-bottom: 10px; /* 对话框底部与下面元素留出间距 */
+
+            background: #ffffff; /* 对话框背景色为白色 */
+
+            border: 3px solid #000; /* 黑色粗边框，模拟像素风框线 */
+
+            box-shadow: 4px 4px 0 #3b2f2f; /* 向右下投影，模拟像素风阴影效果 */
+
+        }
+
+        .bubble::after {
+
+            content: ""; /* 生成一个伪元素，用来画对话框的小尾巴 */
+
+            position: absolute; /* 绝对定位在对话框内部 */
+
+            left: 20px; /* 尾巴相对左侧偏移 20px */
+
+            bottom: -10px; /* 尾巴往下超出一点作为三角形尖角 */
+
+            width: 12px; /* 尾巴的宽度 */
+
+            height: 12px; /* 尾巴的高度 */
+
+            background: #fff; /* 尾巴背景颜色与对话框一致 */
+
+            border-left: 3px solid #000; /* 左边框，形成一个直角边 */
+
+            border-bottom: 3px solid #000; /* 下边框，形成另一个直角边 */
+
+            box-shadow: 4px 4px 0 #3b2f2f; /* 尾巴也加上阴影，保持像素风整体感 */
+
+            transform: translateY(-2px) rotate(45deg); /* 向上微调 2px，然后旋转 45 度，形成菱形的小尾巴形状 */
+
+        }
+
+        h1 {
+
+            margin: 0; /* 去掉标题默认外边距，避免撑大对话框 */
+
+            font-size: 20px; /* 标题文字大小 */
+
+            color: #222; /* 深灰色标题文字 */
+
+        }
+
+        .tip {
+
+            font-size: 13px; /* 提示文字稍微小一些 */
+
+            color: #333; /* 深一点的灰色文字 */
+
+            margin: 0; /* 去掉默认外边距 */
+
+        }
+
+        .inputs {
+
+            display: grid; /* 使用网格布局排列输入框 */
+
+            grid-template-columns: 1fr; /* 单列布局，每行一个输入框 */
+
+            gap: 8px; /* 各输入框之间的间距为 8px */
+
+            width: 100%; /* 宽度占满父容器可用宽度 */
+
+            max-width: 300px; /* 最大宽度限制为 300px，避免太宽 */
+
+            margin: 18px 0 12px; /* 上外边距 18px，下外边距 12px，左右为 0 */
+
+        }
+
+        .inputs input {
+
+            padding: 6px; /* 输入框内部留 6px 空白 */
+
+            font-size: 14px; /* 文本字号 14px */
+
+            border-radius: 4px; /* 输入框边角圆角 4px */
+
+            border: 1px solid #ccc; /* 浅灰色边框 */
+
+        }
+
+        button {
+
+            padding: 10px 20px; /* 按钮上下 10px 左右 20px 内边距 */
+
+            background: #3b2f2f; /* 按钮深棕色背景 */
+
+            color: #f7e7c1; /* 浅米黄色文字 */
+
+            border: 2px solid #e6d2a2; /* 带一点复古金属感的浅色边框 */
+
+            border-radius: 6px; /* 按钮圆角 6px */
+
+            font-size: 15px; /* 按钮文字大小 */
+
+            cursor: pointer; /* 鼠标变成手型，提示可点击 */
+
+            box-shadow: 0 0 10px rgba(0,0,0,0.4); /* 按钮周围加一圈柔和阴影 */
+
+        }
+
+        .cards {
+
+            margin-top: 20px; /* 卡牌区域顶部与按钮之间留出 20px 间距 */
+
+            display: grid; /* 使用 grid 布局排列卡牌 */
+
+            grid-template-columns: repeat(3, 120px); /* 三列，每列宽度固定为 120px */
+
+            gap: 16px; /* 卡牌之间间距 16px */
+
+        }
+
+        .card {
+
+            width: 120px; /* 每张卡牌容器宽度 120px */
+
+            height: 200px; /* 每张卡牌高度 200px */
+
+            perspective: 1000px; /* 提供 3D 透视距离，用于内部翻转效果 */
+
+            cursor: pointer; /* 鼠标悬停时为手型 */
+
+            position: relative; /* 相对定位，为内部的绝对定位（特效）提供参照点 */
+
+        }
+
+        /* 下面是翻开卡牌时显示的 GIF 特效样式（位于卡牌下方） */
+
+        .effect {
+
+            position: absolute; /* 绝对定位在 card 容器内部 */
+
+            bottom: -90px; /* 相对卡牌底部往下 90px，让特效出现在卡牌下面 */
+
+            left: 50%; /* 将特效放在卡牌水平中心 */
+
+            transform: translateX(-50%); /* 向左平移自身一半，实现完美居中 */
+
+            width: 150px; /* 特效图片显示宽度 150px */
+
+            height: 150px; /* 特效图片显示高度 150px */
+
+            z-index: 10; /* 放在较上层，确保不会被背景遮挡（但会盖住下方内容） */
+
+            pointer-events: none; /* 特效不响应鼠标事件，点击仍然作用于卡牌而不是图片 */
+
+            display: none; /* 默认不显示特效，只有翻牌后才显示 */
+
+        }
+
+        .card.flipped .effect {
+
+            display: block; /* 当卡牌处于 flipped 状态时，显示该特效 */
+
+        }
+
+        .inner {
+
+            width: 100%; /* 内层容器占满 card 宽度 */
+
+            height: 100%; /* 内层容器占满 card 高度 */
+
+            position: relative; /* 相对定位，内部 front/back 使用绝对定位 */
+
+            transform-style: preserve-3d; /* 保留子元素的 3D 变换效果 */
+
+            transition: transform 1s cubic-bezier(0.23,1,0.32,1); /* 设置翻转动画曲线和时长 */
+
+        }
+
+        .card.flipped .inner {
+
+            /* 翻转后的效果：旋转 900 度（多圈），放大一点，并且向上浮起 */
+
+            transform: rotateY(900deg) scale(1.1) translateY(-8px);
+
+            box-shadow: 0 0 20px rgba(255,215,0,0.9); /* 卡牌周围出现金色发光阴影 */
+
+        }
+
+        .front {
+
+            position: absolute; /* 绝对定位覆盖整个卡牌区域 */
+
+            width: 100%; /* 占满宽度 */
+
+            height: 100%; /* 占满高度 */
+
+            backface-visibility: hidden; /* 当背面翻转到正面时，这一面会隐藏 */
+
+            border-radius: 10px; /* 卡牌圆角 */
+
+            border: 2px solid #d4c49d; /* 卡牌边框颜色偏米色 */
+
+            /* 卡牌背面使用统一图案（类似塔罗牌背面） */
+
+            background-image: url("https://png.pngtree.com/thumb_back/fh260/background/20210908/pngtree-mystical-bohemian-tarot-card-with-moon-decorative-image_779769.jpg");
+
+            background-size: cover; /* 图像自动放大裁切以覆盖整个卡牌 */
+
+            background-position: center center; /* 背景图居中显示 */
+
+            background-repeat: no-repeat; /* 不重复平铺背景图 */
+
+        }
+
+        .back {
+
+            position: absolute; /* 绝对定位覆盖整个卡牌区域 */
+
+            width: 100%; /* 占满宽度 */
+
+            height: 100%; /* 占满高度 */
+
+            backface-visibility: hidden; /* 背面在翻转时隐藏不需要的一面 */
+
+            border-radius: 10px; /* 圆角与背面保持一致 */
+
+            border: 2px solid #d4c49d; /* 边框颜色一致 */
+
+            background-size: cover; /* 塔罗牌正面图片铺满整个卡片 */
+
+            background-position: center center; /* 图像居中 */
+
+            background-repeat: no-repeat; /* 不重复 */
+
+            transform: rotateY(180deg); /* 默认旋转 180 度，背对用户，等待翻转 */
+
+            display: flex; /* 使用 flex 布局来对齐文字标签 */
+
+            align-items: flex-end; /* 让文字垂直方向靠下显示（卡牌底部） */
+
+            justify-content: center; /* 水平方向居中对齐文字 */
+
+            padding: 10px; /* 文字与卡牌边缘保持 10px 间距 */
+
+        }
+
+        .back span {
+
+            font-size: 14px; /* 标签文字大小 */
+
+            background: rgba(255,244,220,0.9); /* 标签背景为半透明米黄色 */
+
+            padding: 4px 8px; /* 标签内边距 */
+
+            border-radius: 6px; /* 标签圆角 */
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- 上方标题对话框，显示"今天吃什么！" -->
+
+    <div class="bubble bubble-title">
+
+        <h1>今天吃什么！</h1>
+
+    </div>
+
+    <!-- 提示对话框，告诉用户使用步骤 -->
+
+    <div class="bubble bubble-tip">
+
+        <p class="tip">请输入三条内容 → 洗牌 → 抽一张牌。</p>
+
+    </div>
+
+    <!-- 输入区域：三个文本输入框 -->
+
+    <div class="inputs" id="inputs">
+
+        <input type="text" placeholder="内容 1"> <!-- 第一个输入框，提示文字"内容 1" -->
+
+        <input type="text" placeholder="内容 2"> <!-- 第二个输入框，提示文字"内容 2" -->
+
+        <input type="text" placeholder="内容 3"> <!-- 第三个输入框，提示文字"内容 3" -->
+
+    </div>
+
+    <!-- 点击后会根据输入内容生成三张牌并随机排序 -->
+
+    <button id="shuffleBtn">洗牌并生成卡牌</button>
+
+    <!-- 卡牌容器，JS 会动态往这里插入 .card 元素 -->
+
+    <div class="cards" id="cards"></div>
+
+    <script>
+
+        /*
+
+         * tarotFaces 数组：存放三张塔罗牌正面图片的 URL
+
+         * 它们分别对应 输入框1 / 输入框2 / 输入框3
+
+         */
+
+        const tarotFaces = [
+
+            "https://static.wikia.nocookie.net/bubble-bobble/images/9/9c/The_Magician.png/revision/latest?cb=20161204113417", // 魔术师
+
+            "https://static.wikia.nocookie.net/bubble-bobble/images/8/88/The_High_Priestess.png/revision/latest?cb=20161204113442", // 女祭司
+
+            "https://static.wikia.nocookie.net/bubble-bobble/images/3/39/The_Empress.png/revision/latest?cb=20161204113457" // 女皇
+
+        ];
+
+        // 获取"洗牌并生成卡牌"按钮
+
+        const shuffleBtn = document.getElementById('shuffleBtn');
+
+        // 获取用于放置卡片的容器
+
+        const cardsContainer = document.getElementById('cards');
+
+        // 获取输入框容器，用于后面获取所有 input
+
+        const inputContainer = document.getElementById('inputs');
+
+        // flipped 标记：是否已经翻开过一张牌，初始为 false
+
+        let flipped = false;
+
+        /*
+
+         * shuffle 函数：对传入的数组进行原地洗牌（Fisher–Yates 洗牌算法）
+
+         * 参数 a：要被打乱顺序的数组
+
+         */
+
+        function shuffle(a) {
+
+            // 从数组最后一个元素开始，向前遍历
+
+            for (let i = a.length - 1; i > 0; i--) {
+
+                // 在 0 ~ i 范围内随机生成一个索引 j
+
+                const j = Math.floor(Math.random() * (i + 1));
+
+                // 交换 a[i] 和 a[j]，实现随机打乱
+
+                [a[i], a[j]] = [a[j], a[i]];
+
+            }
+
+            // 返回被打乱后的数组
+
+            return a;
+
+        }
+
+        /*
+
+         * 给"洗牌并生成卡牌"按钮绑定点击事件
+
+         */
+
+        shuffleBtn.addEventListener('click', () => {
+
+            // 每次点击生成新牌时，允许再次翻牌，所以重置 flipped 为 false
+
+            flipped = false;
+
+            // 从 inputContainer 中拿到所有 input 元素，转成数组，再取出它们的值并去掉两端空格
+
+            const values = [...inputContainer.querySelectorAll('input')].map(i => i.value.trim());
+
+            // 如果有任意一个输入框是空字符串，则弹出提示并终止函数
+
+            if (values.some(v => v === "")) {
+
+                alert("请填写全部内容");
+
+                return;
+
+            }
+
+            // 创建一个数组 [0,1,2]，代表三个位置的索引
+
+            const order = shuffle([0, 1, 2]); // 对索引数组进行洗牌，实现随机位置
+
+            // 先清空上一次生成的卡牌内容
+
+            cardsContainer.innerHTML = "";
+
+            // 遍历洗牌后的索引数组 order
+
+            order.forEach(idx => {
+
+                // 创建一个 div 元素表示单张卡牌
+
+                const card = document.createElement('div');
+
+                card.className = 'card'; // 设置卡牌的样式类名
+
+                // 创建卡牌内层容器，用于 3D 翻转
+
+                const inner = document.createElement('div');
+
+                inner.className = 'inner';
+
+                // 创建卡牌背面（未翻开时看到的一面）
+
+                const front = document.createElement('div');
+
+                front.className = 'front';
+
+                // 创建卡牌正面（翻开后显示塔罗牌和输入内容）
+
+                const back = document.createElement('div');
+
+                back.className = 'back';
+
+                // 设置正面背景图为对应索引的塔罗牌图片
+
+                back.style.backgroundImage = `url(${tarotFaces[idx]})`;
+
+                // 创建一个 span 元素，用于显示用户输入的文字
+
+                const span = document.createElement('span');
+
+                span.textContent = values[idx]; // 将对应输入框的内容赋值给 span
+
+                // 把文字标签添加到卡牌正面上（靠底部显示）
+
+                back.appendChild(span);
+
+                // 创建一个 img 元素，用来显示翻牌后的 GIF 魔法阵特效
+
+                const effect = document.createElement('img');
+
+                effect.className = 'effect'; // 使用 .effect 样式定位和隐藏/显示
+
+                // 设置特效图片地址（魔法阵 gif），注意它是一个不透明 gif
+
+                effect.src = "https://i.pinimg.com/originals/c7/cf/2a/c7cf2a648a6a985c788f8f6c5911a173.gif";
+
+                // 将 front 和 back 添加到 inner 内层容器中
+
+                inner.appendChild(front);
+
+                inner.appendChild(back);
+
+                // 将 inner 和 effect 都添加到 card 卡牌容器中
+
+                card.appendChild(inner);
+
+                card.appendChild(effect);
+
+                // 给每张卡牌绑定点击事件，用于翻牌
+
+                card.addEventListener('click', () => {
+
+                    // 如果已经翻过一张牌（flipped 为 true），则后续点击无效
+
+                    if (flipped) return;
+
+                    // 给当前卡牌添加 flipped 类，触发 CSS 中的翻牌和特效显示
+
+                    card.classList.add('flipped');
+
+                    // 标记已经翻牌，禁止再翻第二张
+
+                    flipped = true;
+
+                });
+
+                // 将这张完整的卡牌插入到 cardsContainer 容器中
+
+                cardsContainer.appendChild(card);
+
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>
+
