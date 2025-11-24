@@ -186,7 +186,7 @@
 
         }
 
-        /* 下面是翻开卡牌时显示的 GIF 特效样式（位于卡牌下方） */
+        /* 下面是翻开卡牌时显示的 SVG 魔法阵特效样式（位于卡牌下方） */
 
         .effect {
 
@@ -198,21 +198,97 @@
 
             transform: translateX(-50%); /* 向左平移自身一半，实现完美居中 */
 
-            width: 150px; /* 特效图片显示宽度 150px */
+            width: 150px; /* 魔法阵显示宽度 150px */
 
-            height: 150px; /* 特效图片显示高度 150px */
+            height: 150px; /* 魔法阵显示高度 150px */
 
-            z-index: 10; /* 放在较上层，确保不会被背景遮挡（但会盖住下方内容） */
+            z-index: 1; /* 降低 z-index，确保不会遮挡卡牌 */
 
             pointer-events: none; /* 特效不响应鼠标事件，点击仍然作用于卡牌而不是图片 */
 
             display: none; /* 默认不显示特效，只有翻牌后才显示 */
+
+            opacity: 0.7; /* 设置透明度，确保不遮挡卡牌 */
 
         }
 
         .card.flipped .effect {
 
             display: block; /* 当卡牌处于 flipped 状态时，显示该特效 */
+
+        }
+
+        /* SVG 魔法阵动画样式 */
+
+        .effect svg {
+
+            width: 100%; /* SVG 占满容器宽度 */
+
+            height: 100%; /* SVG 占满容器高度 */
+
+        }
+
+        /* 外层旋转环动画 */
+
+        .ring-outer {
+
+            transform-origin: 75px 75px; /* 设置旋转中心为 SVG 中心 */
+
+            animation: rotate 8s linear infinite; /* 8秒旋转一圈，无限循环 */
+
+        }
+
+        /* 中层旋转环动画 */
+
+        .ring-middle {
+
+            transform-origin: 75px 75px; /* 设置旋转中心为 SVG 中心 */
+
+            animation: rotate 12s linear infinite reverse; /* 12秒反向旋转一圈，无限循环 */
+
+        }
+
+        /* 内层脉冲发光效果 */
+
+        .glow-inner {
+
+            animation: pulse 2s ease-in-out infinite; /* 2秒脉冲动画，无限循环 */
+
+        }
+
+        /* 旋转动画关键帧 */
+
+        @keyframes rotate {
+
+            from {
+
+                transform: rotate(0deg);
+
+            }
+
+            to {
+
+                transform: rotate(360deg);
+
+            }
+
+        }
+
+        /* 脉冲发光动画关键帧 */
+
+        @keyframes pulse {
+
+            0%, 100% {
+
+                opacity: 0.6; /* 初始和结束时的透明度 */
+
+            }
+
+            50% {
+
+                opacity: 1; /* 中间时的最大透明度 */
+
+            }
 
         }
 
@@ -328,7 +404,7 @@
 
     <div class="bubble bubble-tip">
 
-        <p class="tip">请输入三条内容 → 洗牌 → 抽一张牌。</p>
+        <p class="tip">点击"洗牌并生成卡牌" → 系统将自动填充三家纽黑文高评分餐厅 → 抽一张牌。</p>
 
     </div>
 
@@ -369,6 +445,54 @@
             "https://static.wikia.nocookie.net/bubble-bobble/images/8/88/The_High_Priestess.png/revision/latest?cb=20161204113442", // 女祭司
 
             "https://static.wikia.nocookie.net/bubble-bobble/images/3/39/The_Empress.png/revision/latest?cb=20161204113457" // 女皇
+
+        ];
+
+        /*
+
+         * newHavenRestaurants 数组：存放纽黑文地区谷歌评分四星以上的餐厅
+
+         * 基于搜索结果整理的高评分餐厅列表
+
+         */
+
+        const newHavenRestaurants = [
+
+            "Union League Cafe", // 法式美食和海鲜，4.6星
+
+            "ZINC", // 现代美式料理和各国风味融合，4.5星
+
+            "Shell & Bones Oyster Bar and Grill", // 海鲜和牛排，4.5星
+
+            "New Haven's Taste of China", // 中式菜肴，4.2星
+
+            "Koffee?", // 咖啡馆，4.5星
+
+            "G Cafe Bakery", // 欧洲风味面包和糕点，4.0星
+
+            "Frank Pepe Pizzeria Napoletana", // 著名披萨店，4.5星+
+
+            "Modern Apizza", // 传统披萨店，4.5星+
+
+            "Louis' Lunch", // 历史悠久的汉堡店，4.0星+
+
+            "Mezcal", // 墨西哥餐厅，4.3星+
+
+            "Barracuda Bistro & Bar", // 海鲜和酒吧，4.2星+
+
+            "Barcelona Wine Bar", // 西班牙小吃和葡萄酒，4.4星+
+
+            "Caseus Fromagerie Bistro", // 法式小酒馆，4.3星+
+
+            "Sally's Apizza", // 传统披萨店，4.4星+
+
+            "Claire's Corner Copia", // 素食餐厅，4.2星+
+
+            "Olives & Oil", // 地中海餐厅，4.3星+
+
+            "Tre Scalini Ristorante", // 意大利餐厅，4.4星+
+
+            "Pacifico Restaurant", // 拉丁美洲料理，4.3星+
 
         ];
 
@@ -420,6 +544,28 @@
 
         /*
 
+         * selectRandomRestaurants 函数：从餐厅列表中随机选择3家不同的餐厅
+
+         * 返回：包含3个餐厅名称的数组
+
+         */
+
+        function selectRandomRestaurants() {
+
+            // 复制餐厅数组并洗牌
+
+            const shuffled = [...newHavenRestaurants];
+
+            shuffle(shuffled);
+
+            // 返回前3个餐厅
+
+            return shuffled.slice(0, 3);
+
+        }
+
+        /*
+
          * 给"洗牌并生成卡牌"按钮绑定点击事件
 
          */
@@ -430,11 +576,23 @@
 
             flipped = false;
 
+            // 随机选择3家餐厅并自动填充到输入框
+
+            const selectedRestaurants = selectRandomRestaurants();
+
+            const inputElements = inputContainer.querySelectorAll('input');
+
+            inputElements.forEach((input, index) => {
+
+                input.value = selectedRestaurants[index];
+
+            });
+
             // 从 inputContainer 中拿到所有 input 元素，转成数组，再取出它们的值并去掉两端空格
 
             const values = [...inputContainer.querySelectorAll('input')].map(i => i.value.trim());
 
-            // 如果有任意一个输入框是空字符串，则弹出提示并终止函数
+            // 如果有任意一个输入框是空字符串，则弹出提示并终止函数（虽然现在应该不会发生，但保留作为安全检查）
 
             if (values.some(v => v === "")) {
 
@@ -494,15 +652,171 @@
 
                 back.appendChild(span);
 
-                // 创建一个 img 元素，用来显示翻牌后的 GIF 魔法阵特效
+                // 创建一个 SVG 元素，用来显示翻牌后的魔法阵特效
 
-                const effect = document.createElement('img');
+                const effect = document.createElement('div');
 
                 effect.className = 'effect'; // 使用 .effect 样式定位和隐藏/显示
 
-                // 设置特效图片地址（魔法阵 gif），注意它是一个不透明 gif
+                // 创建 SVG 魔法阵结构
 
-                effect.src = "https://i.pinimg.com/originals/c7/cf/2a/c7cf2a648a6a985c788f8f6c5911a173.gif";
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+                svg.setAttribute('viewBox', '0 0 150 150');
+
+                svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+                // 外层旋转环（带符号）
+
+                const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+                outerRing.setAttribute('class', 'ring-outer');
+
+                // 外层圆环
+
+                const outerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+                outerCircle.setAttribute('cx', '75');
+
+                outerCircle.setAttribute('cy', '75');
+
+                outerCircle.setAttribute('r', '70');
+
+                outerCircle.setAttribute('fill', 'none');
+
+                outerCircle.setAttribute('stroke', '#FFD700');
+
+                outerCircle.setAttribute('stroke-width', '2');
+
+                outerCircle.setAttribute('opacity', '0.8');
+
+                outerRing.appendChild(outerCircle);
+
+                // 外层符号（星星）
+
+                for (let i = 0; i < 8; i++) {
+
+                    const angle = (i * 360 / 8) * Math.PI / 180;
+
+                    const x = 75 + 70 * Math.cos(angle);
+
+                    const y = 75 + 70 * Math.sin(angle);
+
+                    const star = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+                    star.setAttribute('d', `M ${x} ${y} L ${x - 3} ${y - 8} L ${x + 3} ${y - 8} Z`);
+
+                    star.setAttribute('fill', '#FFD700');
+
+                    star.setAttribute('opacity', '0.9');
+
+                    outerRing.appendChild(star);
+
+                }
+
+                svg.appendChild(outerRing);
+
+                // 中层旋转环
+
+                const middleRing = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+                middleRing.setAttribute('class', 'ring-middle');
+
+                // 中层圆环
+
+                const middleCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+                middleCircle.setAttribute('cx', '75');
+
+                middleCircle.setAttribute('cy', '75');
+
+                middleCircle.setAttribute('r', '50');
+
+                middleCircle.setAttribute('fill', 'none');
+
+                middleCircle.setAttribute('stroke', '#9370DB');
+
+                middleCircle.setAttribute('stroke-width', '2');
+
+                middleCircle.setAttribute('opacity', '0.7');
+
+                middleRing.appendChild(middleCircle);
+
+                // 中层符号（小点）
+
+                for (let i = 0; i < 12; i++) {
+
+                    const angle = (i * 360 / 12) * Math.PI / 180;
+
+                    const x = 75 + 50 * Math.cos(angle);
+
+                    const y = 75 + 50 * Math.sin(angle);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+                    dot.setAttribute('cx', x);
+
+                    dot.setAttribute('cy', y);
+
+                    dot.setAttribute('r', '2');
+
+                    dot.setAttribute('fill', '#9370DB');
+
+                    dot.setAttribute('opacity', '0.8');
+
+                    middleRing.appendChild(dot);
+
+                }
+
+                svg.appendChild(middleRing);
+
+                // 内层脉冲发光圆
+
+                const innerGlow = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+                innerGlow.setAttribute('class', 'glow-inner');
+
+                // 内层圆（带渐变效果）
+
+                const innerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+                innerCircle.setAttribute('cx', '75');
+
+                innerCircle.setAttribute('cy', '75');
+
+                innerCircle.setAttribute('r', '30');
+
+                innerCircle.setAttribute('fill', 'none');
+
+                innerCircle.setAttribute('stroke', '#FFD700');
+
+                innerCircle.setAttribute('stroke-width', '3');
+
+                innerCircle.setAttribute('opacity', '0.9');
+
+                innerGlow.appendChild(innerCircle);
+
+                // 中心点
+
+                const centerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+                centerDot.setAttribute('cx', '75');
+
+                centerDot.setAttribute('cy', '75');
+
+                centerDot.setAttribute('r', '5');
+
+                centerDot.setAttribute('fill', '#FFD700');
+
+                centerDot.setAttribute('opacity', '1');
+
+                innerGlow.appendChild(centerDot);
+
+                svg.appendChild(innerGlow);
+
+                // 将 SVG 添加到 effect 容器中
+
+                effect.appendChild(svg);
 
                 // 将 front 和 back 添加到 inner 内层容器中
 
